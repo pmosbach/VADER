@@ -377,39 +377,53 @@ if (__name__ == "__main__"):
             continue
         
         try:
-            print '    starting tuner channel name read'
+            print '*   starting tuner channel name read'
             ser = serial.Serial(TUNER_COM, 9600, timeout=0.3)
+            print '    serial port opened'
             ser.flushInput()
+            print '    serial input flushed'
             ser.write('>NC\x0d')
+            print '    channel name command written'
             ser.read(4)
+            print '    read and throw away first four bytes'
             channelName = ''
+            print '    read until you see a carriage return'
             while True:
                 byte=ser.read()
                 if byte == '\r':
                     break
                 channelName += byte
             # print channelName
+            print '    finished reading channel name'
             ser.close()
+            print '    serial port closed'
             theStatus['tuner']['channelName'] = channelName
-            print '    finished tuner channel name read'
+            print '*   finished tuner channel name read'
         except:
             print 'Exception in reading Tuner Channel Name'
             continue
         
         try:
-            print '    starting tuner program name read'
+            print '*   starting tuner program name read'
             ser = serial.Serial(TUNER_COM, 9600, timeout=0.3)
+            print '    serial port opened'
             ser.flushInput()
+            print '    serial input flushed'
             ser.write('>NP\x0d')
+            print '    program name command written'
             ser.read(4)
+            print '    read and throw away first four bytes'
             programName = ''
+            print '    read until you see a carriage return'
             while True:
                 byte=ser.read()
                 if byte == '\r':
                     break
                 programName += byte
             # print programName
+            print '    finished reading program name'
             ser.close()
+            print '    serial port closed'
             theStatus['tuner']['programName'] = programName
             print '    finished tuner program name read'
         except:
