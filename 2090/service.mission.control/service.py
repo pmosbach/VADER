@@ -31,8 +31,7 @@ sys.path.append(__resource__)
 import serial
 
 PORT = 8000
-SWITCH_COM = 2
-TUNER_COM = 12
+SWITCH_COM = 5
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -43,7 +42,7 @@ class DeviceStatus(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if self.path == '/':
             print >>self.wfile, "<html><body>" + str(theCounter) + "<a href='/json'>Patient Test</a>" + str(theStatus) + "</body></html>"
         if self.path == '/counter':
-            print >>self.wfile, "<html><body>" + str(theCounter) + "</body></html>"
+            print >>self.wfile, "<html><body>" + str(theCounter) + "</body></html>" 
         if 'json' in self.path:
             self.send_response(200)
             self.send_header("content-type", "application/json")
@@ -87,9 +86,9 @@ if (__name__  == "__main__"):
     xbmc.log('Version %s started' % __addonversion__)
     theCommandQueue = deque()
     theCounter = 0
-    theInputs = {"1":{"name":"ClickShare","hexChar":'\x81'},"2":{"name":"MCC Video 1","hexChar":'\x82'},"3":{"name":"MCC Video 2","hexChar":'\x83'},"4":{"name":"MCC Video 3","hexChar":'\x84'},"5":{"name":"Apple TV","hexChar":'\x85'},"6":{"name":"WiDi","hexChar":'\x86'},"7":{"name":"VADER","hexChar":'\x87'},"8":{"name":"TV Tuner","hexChar":'\x88'},"0":{"name":"N/A","hexChar":'\x80'}}
-    theOutputs = {"1":{"name":"Left","hexChar":'\x81',"comPort":"6"},"2":{"name":"Center A","hexChar":'\x82',"comPort":"9"},"3":{"name":"Center B","hexChar":'\x83',"comPort":"10"},"4":{"name":"Right A","hexChar":'\x84',"comPort":"8"},"5":{"name":"Right B","hexChar":'\x85',"comPort":"7"},"6":{"name":"Action Center","hexChar":'\x86',"comPort":"11"},"7":{"name":"HEVS 1","hexChar":'\x87',"comPort":"0"},"8":{"name":"HEVS 2","hexChar":'\x88',"comPort":"0"}}
-    theStatus = {"outputs":[{"outputName":"Left","outputNumber":"1","inputNumber":"1","inputName":"ClickShare"},{"outputName":"Center A","outputNumber":"2","inputNumber":"1","inputName":"ClickShare"},{"outputName":"Center B","outputNumber":"3","inputNumber":"2","inputName":"MCC Video 1"},{"outputName":"Right A","outputNumber":"4","inputNumber":"1","inputName":"ClickShare"},{"outputName":"Right B","outputNumber":"5","inputNumber":"2","inputName":"MCC Video 1"},{"outputName":"Action Center","outputNumber":"6","inputNumber":"3","inputName":"MCC Video 2"},{"outputName":"HEVS 1","outputNumber":"7","inputNumber":"5","inputName":"Apple TV"},{"outputName":"HEVS 2","outputNumber":"8","inputNumber":"6","inputName":"WiDi"}],"tuner":{"majorChannel":"008","minorChannel":"001","channelName":"KUHT-HD","programName":"Daytripper"}}
+    theInputs = {"1":{"name":"WiDi","hexChar":'\x81'},"2":{"name":"ATV 1","hexChar":'\x82'},"3":{"name":"ClickShare","hexChar":'\x83'},"4":{"name":"ATV 2","hexChar":'\x84'},"5":{"name":"PC Input 1","hexChar":'\x85'},"6":{"name":"PC Input 2","hexChar":'\x86'},"7":{"name":"PC Input 3","hexChar":'\x87'},"8":{"name":"VADER","hexChar":'\x88'},"0":{"name":"N/A","hexChar":'\x80'}}
+    theOutputs = {"1":{"name":"Left TV","hexChar":'\x81',"audioComPort":"7","videoComPort":"7"},"2":{"name":"Projector","hexChar":'\x82',"audioComPort":"6","videoComPort":"9"},"3":{"name":"Right TV","hexChar":'\x83',"audioComPort":"8","videoComPort":"8"},"5":{"name":"PC Monitor 1","hexChar":'\x85',"audioComPort":"0","videoComPort":"0"},"6":{"name":"PC Monitor 2","hexChar":'\x86',"audioComPort":"0","videoComPort":"0"},"7":{"name":"PC Monitor 3","hexChar":'\x87',"audioComPort":"0","videoComPort":"0"}}
+    theStatus = {"outputs":[{"outputName":"Left TV","outputNumber":"1","inputNumber":"5","inputName":"ClickShare","powerStatus":"UNK","muteStatus":"UNK"},{"outputName":"Projector","outputNumber":"2","inputNumber":"1","inputName":"WiDi","powerStatus":"ON","muteStatus":"OFF"},{"outputName":"Right TV","outputNumber":"3","inputNumber":"8","inputName":"VADER","powerStatus":"UNK","muteStatus":"UNK"},{"outputName":"PC Monitor 1","outputNumber":"5","inputNumber":"5","inputName":"PC Input 1","powerStatus":"UNK","muteStatus":"UNK"},{"outputName":"PC Monitor 2","outputNumber":"6","inputNumber":"6","inputName":"PC Input 2","powerStatus":"UNK","muteStatus":"UNK"},{"outputName":"PC Monitor 3","outputNumber":"7","inputNumber":"7","inputName":"PC Input 3","powerStatus":"UNK","muteStatus":"UNK"}]}
     #theStatus = {'left': 1, 'center1': 1, 'center2': 2, 'right1': 1, 'right2':2, 'actionCenter': 3, 'HEVS1': 5, 'HEVS2': 6}
     httpd = ThreadedTCPServer(('', PORT), DeviceStatus)
     #print "serving at port", PORT
@@ -100,51 +99,12 @@ if (__name__  == "__main__"):
     while (not xbmc.abortRequested):
         time.sleep(0.1)
         theCounter += 1
-        print '*** Begin Command Section ' + str(theCounter)
-        print '**  Command Queue Size: ' + str(len(theCommandQueue))
+        #print '*** Begin Command Section ' + str(theCounter)
+        #print '**  Command Queue Size: ' + str(len(theCommandQueue))
         while theCommandQueue:
             #print '**  beginning of command queue loop'
             command = theCommandQueue.popleft()
-            if command[0] == 'tuner':
-                #print '*   device type: TUNER'
-                if command[1] == 'channel':
-                    #print '    command type: CHANNEL'
-                    if command[2] == '+':
-                        #print '    command: CHANNEL UP'
-                        ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
-                        ser.write('>P1\x0d')
-                        ser.write('>TU\x0d')
-                        ser.close()
-                    elif command[2] == '-':
-                        #print '    command: CHANNEL DOWN'
-                        ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
-                        ser.write('>P1\x0d')
-                        ser.write('>TD\x0d')
-                        ser.close()
-                    else:
-                        #print '    command: TUNE TO ' + command[2]
-                        ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
-                        ser.write('>P1\x0d')
-                        ser.write('>TC=' + command[2] + '\x0d')
-                        ser.close()
-                elif command[1] == 'power':
-                    #print '    command type: POWER'
-                    if command[2] == 'on':
-                        #print '    command: POWER ON'
-                        ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
-                        ser.write('>P1\x0d')
-                        ser.close()
-                    elif command[2] == 'off':
-                        #print'    command: POWER OFF'
-                        ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
-                        ser.write('>P0\x0d')
-                        ser.close()
-                    elif command[2] == 'toggle':
-                        #print'    command: POWER TOGGLE'
-                        ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
-                        ser.write('>PT\x0d')
-                        ser.close()
-            elif command[0] == 'exec':
+            if command[0] == 'exec':
                 #print'*   command type: SCRIPT EXECUTION'
                 if len(command) == 1:
                     #print'    command: EXEC ERROR - NO SCRIPT SPECIFIED'
@@ -164,17 +124,12 @@ if (__name__  == "__main__"):
                     #print'    command type: RESET'
                     xbmc.executebuiltin('Notification(Video Source Control, Resetting All Displays to Default')
                     ser = serial.Serial(SWITCH_COM, 9600, timeout=0.3)
-                    ser.write('\x01\x82\x81\x81')
+                    ser.write('\x01\x85\x81\x81')
                     time.sleep(0.02)
-                    ser.write('\x01\x83\x82\x81')
+                    ser.write('\x01\x86\x82\x81')
                     time.sleep(0.02)
-                    ser.write('\x01\x84\x83\x81')
+                    ser.write('\x01\x87\x83\x81')
                     time.sleep(0.02)
-                    ser.write('\x01\x83\x84\x81')
-                    time.sleep(0.02)
-                    ser.write('\x01\x82\x85\x81')
-                    time.sleep(0.02)
-                    ser.write('\x01\x87\x86\x81')
                     ser.close()
                 else:
                     #print'    command type: SET ' + theOutputs[command[2]]["name"] + ' TO ' + theInputs[command[1]]["name"]
@@ -184,28 +139,79 @@ if (__name__  == "__main__"):
                     ser.close()
             elif command[0] == 'display':
                 #print'*   device type: DISPLAY'
-                if command[2] == 'power':
-                    #print'    command type: POWER TOGGLE ' + theOutputs[command[1]]["name"]
-                    ser = serial.Serial(int(theOutputs[command[1]]["comPort"]), 9600, timeout=0.3)
-                    ser.write('\x08\x22\x00\x00\x00\x00\xd6')
-                    ser.close()
-                elif command[2] == 'volume':
-                    #print'    command type: VOLUME ' + theOutputs[command[1]]["name"]
-                    if command[3] == '+':
-                        #print'    command: VOLUME UP'
-                        ser = serial.Serial(int(theOutputs[command[1]]["comPort"]), 9600, timeout=0.3)
-                        ser.write('\x08\x22\x01\x00\x01\x00\xd4')
+                if command[1] == '2': #Projector/Receiver Hybrid
+                    if command[2] == 'power':
+                        #print'    command type: POWER TOGGLE ' + theOutputs[command[1]]["name"]
+                        if theOutputs[command[1]]["powerStatus"] == 'ON':
+                            ser = serial.Serial(int(theOutputs[command[1]]["videoComPort"]), 4800, timeout=0.3)
+                            ser.write('\x3a\x50\x4f\x57\x52\x30\x0d')
+                            ser.close()
+                        else:
+                            ser = serial.Serial(int(theOutputs[command[1]]["videoComPort"]), 4800, timeout=0.3)
+                            ser.write('\x3a\x50\x4f\x57\x52\x31\x0d')
+                            ser.close()
+                    elif command[2] == 'volume':
+                        #print'    command type: VOLUME ' + theOutputs[command[1]]["name"]
+                        if command[3] == '+':
+                            #print'    command: VOLUME UP'
+                            ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                            ser.write('\x4d\x56\x55\x50\x0d')
+                            ser.close()
+                        elif command[3] == '-':
+                            #print'    command: VOLUME DOWN'
+                            ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                            ser.write('\x4d\x56\x44\x4f\x57\x4e\x0d')
+                            ser.close()
+                        elif command[3] == '0':
+                            #print'    command: VOLUME ZERO'
+                            ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                            ser.write('\x4d\x56\x39\x39\x0d')
+                            ser.close()
+                        else:
+                            if command[4] == 'on':
+                                #print'    command: MUTE ON'
+                                ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                                ser.write('\x4d\x55\x4f\x4e\x0d')
+                                ser.close()
+                            elif command[4] == 'off':
+                                #print'    command: MUTE OFF'
+                                ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                                ser.write('\x4d\x55\x4f\x46\x46\x0d')
+                                ser.close()
+                            else:
+                                #print'    command: MUTE TOGGLE'
+                                ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                                if theOutputs[command[1]]["muteStatus"] == 'ON':
+                                    ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                                    ser.write('\x4d\x55\x4f\x4e\x0d')
+                                    ser.close()
+                                else:
+                                    ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                                    ser.write('\x4d\x55\x4f\x46\x46\x0d')
+                                    ser.close()
+                else:
+                    if command[2] == 'power':
+                        #print'    command type: POWER TOGGLE ' + theOutputs[command[1]]["name"]
+                        ser = serial.Serial(int(theOutputs[command[1]]["videocomPort"]), 9600, timeout=0.3)
+                        ser.write('\x08\x22\x00\x00\x00\x00\xd6')
                         ser.close()
-                    elif command[3] == '-':
-                        #print'    command: VOLUME DOWN'
-                        ser = serial.Serial(int(theOutputs[command[1]]["comPort"]), 9600, timeout=0.3)
-                        ser.write('\x08\x22\x01\x00\x02\x00\xd3')
-                        ser.close()
-                    else:
-                        #print'    command: MUTE'
-                        ser = serial.Serial(int(theOutputs[command[1]]["comPort"]), 9600, timeout=0.3)
-                        ser.write('\x08\x22\x02\x00\x00\x00\xd4')
-                        ser.close()
+                    elif command[2] == 'volume':
+                        #print'    command type: VOLUME ' + theOutputs[command[1]]["name"]
+                        if command[3] == '+':
+                            #print'    command: VOLUME UP'
+                            ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                            ser.write('\x08\x22\x01\x00\x01\x00\xd4')
+                            ser.close()
+                        elif command[3] == '-':
+                            #print'    command: VOLUME DOWN'
+                            ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                            ser.write('\x08\x22\x01\x00\x02\x00\xd3')
+                            ser.close()
+                        else:
+                            #print'    command: MUTE'
+                            ser = serial.Serial(int(theOutputs[command[1]]["audioComPort"]), 9600, timeout=0.3)
+                            ser.write('\x08\x22\x02\x00\x00\x00\xd4')
+                            ser.close()
             #print'**  ending of command queue loop'
 
         #print'*** End command section'
@@ -273,18 +279,25 @@ if (__name__  == "__main__"):
             continue
 
         try:
-            #print'    begin reading status of Switch Output 4'
+            #print '    begin reading status of Switch Output 4'
             ser = serial.Serial(SWITCH_COM, 9600, timeout=0.3)
+            #print'    serial port opened' 
             ser.flushInput()
+            #print'    serial input flushed'
             ser.write('\x05\x80\x84\x81')
+            #print'    serial command written'
             ser.read(2)
+            #print'    read 2 bytes to throw away'
             out = ser.read()
+            #print'    read output byte'
             ser.close()
+            #print'    closing serial port' 
             foo = binascii.b2a_qp(out)
+            #print'    converting binary to ascii'
             source = foo[2]
-            theStatus['outputs'][3]['inputNumber'] = source
-            theStatus['outputs'][3]['inputName'] = theInputs[source]['name']
-            #print'    finished reading status of Switch Output 4'
+            #theStatus['outputs'][3]['inputNumber'] = source
+            #theStatus['outputs'][3]['inputName'] = theInputs[source]['name']
+            #print '    finished reading status of Switch Output 4'
         except:
             print 'Exception in reading status of Switch Output 4'
             continue
@@ -350,87 +363,53 @@ if (__name__  == "__main__"):
             ser.close()
             foo = binascii.b2a_qp(out)
             source = foo[2]
-            theStatus['outputs'][7]['inputNumber'] = source
-            theStatus['outputs'][7]['inputName'] = theInputs[source]['name']
+            #theStatus['outputs'][7]['inputNumber'] = source
+            #theStatus['outputs'][7]['inputName'] = theInputs[source]['name']
             #print'    finished reading status of Switch Output 8'
         except:
             print'Exception in reading status of Switch Output 8'
             continue
             
         # Tuner read
-        #print'**  End Switch status and begin Tuner status'
+        print '**  End Switch status and begin Projector/Receiver status'
         try:
-            #print'    starting tuner channel number read'
-            ser = serial.Serial(TUNER_COM, 9600, timeout=0.3)
+            print '    starting projector power status read'
+            ser = serial.Serial(int(theOutputs["2"]["videoComPort"]), 4800, timeout=0.3)
             ser.flushInput()
-            ser.write('>ST\x0d')
-            ser.read(4)
-            majorChannel = ser.read(3)
-            #print'    ' + majorChannel
-            ser.read(4)
-            minorChannel = ser.read(3)
-            #print'    ' + minorChannel
+            ser.write('\x3a\x50\x4f\x53\x54\x3f\x0d')
+            ser.read(15)
+            powerStatus = ser.read()
+            print '    ' + powerStatus
+            ser.flushInput()
             ser.close()
-            theStatus['tuner']['majorChannel'] = majorChannel
-            theStatus['tuner']['minorChannel'] = minorChannel
-            #print'    finished tuner channel number read'
+            if muteStatus == '3':
+                theStatus['outputs'][1]['powerStatus'] = 'ON'
+            else:
+                theStatus['outputs'][1]['powerStatus'] = 'OFF'
+            print '    finished projector power status read'
         except:
-            print 'Exception in reading Tuner Channel Info'
+            print 'Exception in reading projector power status'
+            continue
+
+        try:
+            print '    starting receiver mute status read'
+            ser = serial.Serial(int(theOutputs["2"]["audioComPort"]), 9600, timeout=0.3)
+            ser.flushInput()
+            ser.write('MU?\x0d')
+            ser.read(2)
+            muteStatus = ser.read()
+            print '    ' + muteStatus
+            ser.flushInput()
+            ser.close()
+            if muteStatus == 'O':
+                theStatus['outputs'][1]['muteStatus'] = 'ON'
+            else:
+                theStatus['outputs'][1]['muteStatus'] = 'OFF'
+            print '    finished receiver mute status read'
+        except:
+            print 'Exception in reading receiver mute status'
             continue
         
-        # try:
-            # print '*   starting tuner channel name read'
-            # ser = serial.Serial(TUNER_COM, 9600, timeout=1.0)
-            # print '    serial port opened'
-            # ser.flushInput()
-            # print '    serial input flushed'
-            # ser.write('>NC\x0d')
-            # print '    channel name command written'
-            # ser.read(4)
-            # print '    read and throw away first four bytes'
-            # channelName = ''
-            # print '    read until you see a carriage return'
-            # while True:
-                # byte=ser.read()
-                # if byte == '\r':
-                    # break
-                # channelName += byte
-            # print '    ' + channelName
-            # print '    finished reading channel name'
-            # ser.close()
-            # print '    serial port closed'
-            # theStatus['tuner']['channelName'] = channelName
-            # print '*   finished tuner channel name read'
-        # except:
-            # print 'Exception in reading Tuner Channel Name'
-            # continue
-        
-        # try:
-            # print '*   starting tuner program name read'
-            # ser = serial.Serial(TUNER_COM, 9600, timeout=1.0)
-            # print '    serial port opened'
-            # ser.flushInput()
-            # print '    serial input flushed'
-            # ser.write('>NP\x0d')
-            # print '    program name command written'
-            # ser.read(4)
-            # print '    read and throw away first four bytes'
-            # programName = ''
-            # print '    read until you see a carriage return'
-            # while True:
-                # byte=ser.read()
-                # if byte == '\r':
-                    # break
-                # programName += byte
-            # print '    ' + programName
-            # print '    finished reading program name'
-            # ser.close()
-            # print '    serial port closed'
-            # theStatus['tuner']['programName'] = programName
-            # print '    finished tuner program name read'
-        # except:
-            # print 'Exception in reading Tuner Program Name'
-            # continue
         # print '*** End status section'
     print "starting server shutdown"
     httpd.shutdown()
