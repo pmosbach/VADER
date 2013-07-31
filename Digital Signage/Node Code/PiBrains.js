@@ -1,14 +1,38 @@
 var http = require('http'); 
 var fs = require("fs"); 
 var sqlite3 = require("sqlite3").verbose(); 
+var file = "test6.db";
+var exists = fs.existsSync(file);
+var body = '';
+var db = new sqlite3.Database(file);
 
-http.createServer(function (inreq, res){
+function piDeeFunction(loc, org, body)
+{
+  var piChunk = JSON.parse(body);
+  if(piChunk.location == "Location" || piChunk.org == "Org Code")
+  {
+    console.log("Sending command to reset pi");
+  }
+  else
+  {
+	if(piChunk.piDee = -1)
+	{
+		db.run("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piChunk.piip + "', '" + piChunk.location + "', '" + piChunk.org + "', Time('now'), 'c:/blahblahblah')", function(error)
+            {
+			    piChunk.piDee = this.lastID;
+		        console.log(piChunk.piDee);
+            });
+	        //send JSON command with piDee
+		//build file path
+	//	db.run("UPDATE Pidentities (filelink) SET ('PI FILE PI FILE') WHERE rowid = piDee");
+	}
+	
+  }
+}
 
-   var file = "test6.db"; 
-   var exists = fs.existsSync(file); 
-   var body = '';
-   var db = new sqlite3.Database(file);
-   
+http.createServer(function (inreq, res)
+{
+
    //create the database if it has not been created 
    if(!exists)
     {
@@ -19,19 +43,21 @@ http.createServer(function (inreq, res){
       db.run("CREATE TABLE Pidentities (PiD ROWID, timestamp TEXT, IP_address TEXT, Location TEXT, Orgcode TEXT, filelink TEXT)"); 
     } 
 
-   inreq.on('data', function (data){
+   inreq.on('data', function (data)
+   {
       body += data;
    });
 
   // var test = JSON.parse(body);
   // console.log(test.location);
 
-   inreq.on('end', function(){
+   inreq.on('end', function()
+   {
 	   res.writeHead(200, {'Content-Type': 'application/json'});
 	   res.end('{OK}\n');
 	  
           var piChunk = JSON.parse(body);
-          console.log(piChunk.location);
+        //  console.log(piChunk.location);
 
 		var user = { 
 		  jsonrpc: '2.0', 
@@ -43,7 +69,7 @@ http.createServer(function (inreq, res){
 		  }
 		}; 
 	   
-	   console.log(body); //error checking
+	   piDeeFunction(piChunk.location, piChunk.org, body);
 
 	   var userString = JSON.stringify(user); 
 
@@ -65,15 +91,17 @@ http.createServer(function (inreq, res){
 		
 	   db.serialize(function() { 
 		   //look to see if create needs to be in db.serialize
-     	   var stmt = db.prepare("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piChunk.piip + "', '" + piChunk.location + "', '" + piChunk.org + "', Time('now'), 'c:/blahblahblah')");
-		   stmt.run();
+     	   //var stmt = db.prepare("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piChunk.piip + "', '" + piChunk.location + "', '" + piChunk.org + "', Time('now'), 'c:/blahblahblah')");
+		  // stmt.run();
 		   
 		   //error checks for now
 		   //selecting and printing
-		   stmt.finalize();
-		   db.each("SELECT rowid AS PiDee, * FROM Pidentities", function(err, row) {
-			     console.log(row.PiDee + ": " + row.Location, row.IP_address, row.Orgcode, row.timestamp, row.filelink);
+		   //stmt.finalize();
+		   db.each("SELECT rowid AS piDee, * FROM Pidentities", function(err, row) {
+			     console.log(row.piDee + ": " + row.Location, row.IP_address, row.Orgcode, row.timestamp, row.filelink);
 			});
+
+
 		}); 
            //db.close();
 		
