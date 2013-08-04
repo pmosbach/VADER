@@ -1,5 +1,6 @@
 var http = require('http'); 
-var fs = require("fs"); 
+var fs = require('fs');
+var path = require('path');
 var sqlite3 = require("sqlite3").verbose(); 
 var mkdirp = require('mkdirp');
 var file = "test10.db";
@@ -7,6 +8,10 @@ var piChunk = '';
 var body = '';
 var db = new sqlite3.Database(file);
 var exists = fs.existsSync(file);
+var ORG_ROOT = path.resolve('contents' + path.sep + 'Org');
+var LOCATION_ROOT = path.resolve('contents' + path.sep + 'Location');
+var FILLING_ROOT = path.resolve('piFilling');
+var FILELINK_ROOT = '\\\\tsar-bomba\\';
 
 
    //create the database if it has not been created 
@@ -21,7 +26,7 @@ var exists = fs.existsSync(file);
 
 function createNewFolder(piDee)
 {
-   mkdirp('/root/piFilling/' +piDee, function (err) {
+   mkdirp(FILLING_ROOT + piDee, function (err) {
     if (err) console.error(err)
     else console.log('pow!')
    });
