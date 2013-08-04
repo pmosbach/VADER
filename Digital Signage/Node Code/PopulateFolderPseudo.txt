@@ -1,0 +1,18 @@
+Node PopulateFolder Pseudo Code:
+Need a constant for the mount points for Org and Location
+Need a constant for the UNC address of the fileserver
+Need to take the Pi folder as an argument
+Need to decide whether this gets called once (and handles both Org and Location) or twice (with the option specified)
+Need to remember to clean out existing links
+
+Search Down:
+Start by reading the base directory (fs.readdir)
+	for each file in the list, test it to see if it's a directory (fs.stat)
+		if it's a directory, apply the current match
+			if match, walk that directory
+			if no match in the directory, declare best match and call walkback from the directory
+			
+Walk Back:
+while current directory is not base directory
+	make a link to the current directory and place it in the Pi folder
+	Normalize the current directory with .. appended to it
