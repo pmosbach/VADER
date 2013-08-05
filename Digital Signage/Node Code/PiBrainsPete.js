@@ -8,10 +8,11 @@ var piChunk = '';
 var body = '';
 var db = new sqlite3.Database(file);
 var exists = fs.existsSync(file);
-var CONTENTS_ROOT = path.resolve('contents');
-var ORG_ROOT = path.resolve('contents' + path.sep + 'Org');
-var LOCATION_ROOT = path.resolve('contents' + path.sep + 'Location');
-var FILLING_ROOT = path.resolve('piFilling');
+var MOUNT_ROOT = '/mnt/DigitalSignage';
+var CONTENTS_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'contents');
+var ORG_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'contents' + path.sep + 'Org');
+var LOCATION_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'contents' + path.sep + 'Location');
+var FILLING_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'piFilling');
 var FILELINK_ROOT = '\\\\tsar-bomba\\software\\SignageContents\\';
 
 
@@ -27,7 +28,7 @@ var FILELINK_ROOT = '\\\\tsar-bomba\\software\\SignageContents\\';
 
 function createNewFolder(piDee)
 {
-   mkdirp(FILLING_ROOT + piDee, function (err) {
+   mkdirp(FILLING_ROOT + path.sep + piDee, function (err) {
     if (err) console.error(err)
     else console.log('pow!')
    });
@@ -37,17 +38,19 @@ function populateFolder(piDee, loc, org)
 {
 	//clear out the old
 	//search down
-	var finder = require('findit').find(CONTENTS_ROOT);
+	var finder = require('findit2').find(CONTENTS_ROOT);
 
 	finder.on('directory', function (dir, stat) {
-		console.log(dir + '/');
+		console.log(dir + path.sep);
 		if (path.basename(dir) == loc)
 		{
-			walkItBackFrom(dir, LOCATION_ROOT, FILLING_ROOT+piDee);
+			console.log('Found Location directory')
+			walkItBackFrom(dir, LOCATION_ROOT, FILLING_ROOT + path.sep + piDee);
 		}
 		else if (path.basename(dir) == org)
 		{
-			walkItBackFrom(dir, ORG_ROOT, FILLING_ROOT+piDee);
+			console.log('Found Org directory')
+			walkItBackFrom(dir, ORG_ROOT, FILLING_ROOT + path.sep + piDee);
 		}
 	});
 	
@@ -59,10 +62,13 @@ function populateFolder(piDee, loc, org)
 
 function walkItBackFrom(from, to, destination)
 {
+	console.log('Ready to walk it back',from,to,destination);
 	while (from != to)
 	{
+		console.log(from);
 		fs.symlink(from, destination, 'dir', function (err) {console.log(err);});
-		from = path.normalize(from + '..')
+		from = path.normalize(from + path.sep + '..')
+		console.log('Walking Back');
 	}
 }
 	
