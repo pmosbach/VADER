@@ -33,11 +33,11 @@ function createNewFolder(piDee)
    });
 }	
 
-function populateFolder()
+function populateFolder(piDee, loc, org)
 {
 	//clear out the old
 	//search down
-	var finder = require('findit').find();
+	var finder = require('findit').find(CONTENTS_ROOT);
 
 	finder.on('directory', function (dir, stat) {
 		console.log(dir + '/');
@@ -187,14 +187,15 @@ function sendNotification(piip)
 function createPidentity(loc, org, piDee, piip)
 {
    console.log("Entered the if piDee = 0 statement"); 
-		db.run("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piip + "', '" + loc + "', '" + org + "', Time('now'), " + )", function(error)
+		db.run("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piip + "', '" + loc + "', '" + org + "', Time('now'), '" + FILELINK_ROOT + "\\" + piDee + "')", function(error)
             {
 			    piDee = this.lastID;
 		        //db.run("UPDATE Pidentities SET filelink = 'XXXXXXXXXXXXXXXX' WHERE rowid = "+ piDee);  
 				console.log("inside");
 				console.log(piDee);
 				sendpiDeeSetting(piip, piDee);
-				createNewFolder(piDee);    
+				createNewFolder(piDee);
+				populateFolder(piDee, loc, org);
             });
    
 		//stmt.run();
