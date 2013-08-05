@@ -1,17 +1,18 @@
 var http = require('http'); 
 var fs = require('fs');
 var path = require('path');
-var sqlite3 = require("sqlite3").verbose(); 
+var sqlite3 = require('sqlite3').verbose(); 
 var mkdirp = require('mkdirp');
 var file = "test10.db";
 var piChunk = '';
 var body = '';
 var db = new sqlite3.Database(file);
 var exists = fs.existsSync(file);
+var CONTENTS_ROOT = path.resolve('contents');
 var ORG_ROOT = path.resolve('contents' + path.sep + 'Org');
 var LOCATION_ROOT = path.resolve('contents' + path.sep + 'Location');
 var FILLING_ROOT = path.resolve('piFilling');
-var FILELINK_ROOT = '\\\\tsar-bomba\\';
+var FILELINK_ROOT = '\\\\tsar-bomba\\software\\SignageContents\\';
 
 
    //create the database if it has not been created 
@@ -36,7 +37,33 @@ function populateFolder()
 {
 	//clear out the old
 	//search down
-	//walk back
+	var finder = require('findit').find();
+
+	finder.on('directory', function (dir, stat) {
+		console.log(dir + '/');
+		if (path.basename(dir) == loc)
+		{
+			walkItBackFrom(dir, LOCATION_ROOT, FILLING_ROOT+piDee);
+		}
+		else if (path.basename(dir) == org)
+		{
+			walkItBackFrom(dir, ORG_ROOT, FILLING_ROOT+piDee);
+		}
+	});
+	
+	finder.on('end', function () {
+		//do something if we never matched
+	});
+	//don't forget the image in the base directory
+}
+
+function walkItBackFrom(from, to, destination)
+{
+	while (from != to)
+	{
+		fs.symlink(from, destination, 'dir', function (err) {console.log(err);});
+		from = path.normalize(from + '..')
+	}
 }
 	
 function sendpiDeeSetting(piip, piDee)
@@ -160,7 +187,7 @@ function sendNotification(piip)
 function createPidentity(loc, org, piDee, piip)
 {
    console.log("Entered the if piDee = 0 statement"); 
-		db.run("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piip + "', '" + loc + "', '" + org + "', Time('now'), 'c:/blahblahblah')", function(error)
+		db.run("INSERT INTO Pidentities (IP_address, Location, Orgcode, timestamp, filelink) VALUES ('" + piip + "', '" + loc + "', '" + org + "', Time('now'), " + )", function(error)
             {
 			    piDee = this.lastID;
 		        //db.run("UPDATE Pidentities SET filelink = 'XXXXXXXXXXXXXXXX' WHERE rowid = "+ piDee);  
