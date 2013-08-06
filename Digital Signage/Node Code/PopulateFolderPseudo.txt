@@ -16,3 +16,18 @@ Walk Back:
 while current directory is not base directory
 	make a link to the current directory and place it in the Pi folder
 	Normalize the current directory with .. appended to it
+	
+James David Turnage:
+Jager Venuti Addams
+Maus Ide Vanderjagt
+Majer Dusti Gavenda
+Smart Judie Gavenda
+Steven Jim Daugaard
+Midget Venus Jaarda
+
+Hayley Marie Archer:
+Merry Aaliyah Reech
+Rachael Emery Yahir
+Cherry Eyre Mahalia
+Harley Cherie Rayam
+Herry Heye Calamari

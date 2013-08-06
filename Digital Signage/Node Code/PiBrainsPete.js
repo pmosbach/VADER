@@ -13,7 +13,7 @@ var CONTENTS_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'contents');
 var ORG_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'contents' + path.sep + 'Org');
 var LOCATION_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'contents' + path.sep + 'Location');
 var FILLING_ROOT = path.resolve(MOUNT_ROOT + path.sep + 'piFilling');
-var FILELINK_ROOT = '\\\\tsar-bomba\\software\\SignageContents\\';
+var FILELINK_ROOT = '\\\\192.168.1.136\\piFilling\\';
 
 
    //create the database if it has not been created 
@@ -63,10 +63,12 @@ function populateFolder(piDee, loc, org)
 function walkItBackFrom(from, to, destination)
 {
 	console.log('Ready to walk it back',from,to,destination);
+	var tagForUniqueness = ((LOCATION_ROOT === to) ? '-Location' : '-Org');
 	while (from != to)
 	{
-		console.log(from);
-		fs.symlink(from, destination, 'dir', function (err) {console.log(err);});
+		console.log(from, destination);
+		fs.symlink(from, destination + path.sep + path.basename(from) + tagForUniqueness, 'dir', function (err) {if (err) console.log(err);});
+		//fs.symlinkSync(from, destination + path.sep + path.basename(from) + tagForUniqueness, 'dir');
 		from = path.normalize(from + path.sep + '..')
 		console.log('Walking Back');
 	}
