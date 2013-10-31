@@ -393,6 +393,7 @@ class tunerThread(threading.Thread):
                             #print '    command: TUNE TO ' + command[2]
                             ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
                             ser.write('>P1\x0d')
+                            print '>TC=' + command[2] + '\x0d'
                             ser.write('>TC=' + command[2] + '\x0d')
                             ser.close()
                     elif command[1] == 'power':
@@ -422,10 +423,10 @@ class tunerThread(threading.Thread):
                 ser.write('>ST\x0d')
                 ser.read(4)
                 majorChannel = ser.read(3)
-                #print'    :' + majorChannel
+                #print'    ' + majorChannel
                 ser.read(4)
                 minorChannel = ser.read(3)
-                #print'    :' + minorChannel
+                #print'    ' + minorChannel
                 ser.close()
                 theStatus['tuner']['majorChannel'] = majorChannel
                 theStatus['tuner']['minorChannel'] = minorChannel

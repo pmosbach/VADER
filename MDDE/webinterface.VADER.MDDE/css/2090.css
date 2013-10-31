@@ -205,12 +205,13 @@ nav a:hover{
 .btnVolUp { background-image: url('../img/soundUp.png'); -moz-border-radius: 15px; border-radius: 15px;  background-size: cover; width:13%; float: left; }
 .btnVolDown { background-image: url('../img/soundDown.png'); -moz-border-radius: 15px; border-radius: 15px;  background-size: cover; width:13%; float: left; }
 .soundPanel { position: absolute; bottom: 0; left: 0; -moz-border-radius: 15px; border-radius: 15px; border-style: inset; background-color: rgba(175,176,179,.75);}
-.bottomButtons { position: relative; background-repeat: no-repeat; background-position: center; -moz-background-size: contain; background-size: contain; width: 20%; margin-bottom: 1%; -moz-border-radius: 15px; border-radius: 15px; border-style: outset; border-color: rgb(51, 173, 255) ;background-color: rgba(51, 173, 255,.75);}
-.inputText{ background-image: url('../img/inputText.png'); -moz-background-size: contain; background-size: contain; background-repeat: no-repeat; width: 7%;}
+.bottomButtonsLeft { position: relative; background-repeat: no-repeat; background-position: center; -moz-background-size: contain; background-size: contain; width: 20%; margin-bottom: 1%; -moz-border-radius: 15px; border-radius: 15px; border-style: outset; border-color: rgb(51, 173, 255) ;background-color: rgba(51, 173, 255,.75);}
+.bottomButtonsRight { position: relative; background-repeat: no-repeat; background-position: center; -moz-background-size: contain; background-size: contain; width: 9%; margin-bottom: 1%; margin-left: 1%;-moz-border-radius: 15px; border-radius: 15px; border-style: outset; border-color: rgb(51, 173, 255) ;background-color: rgba(51, 173, 255,.75);}
+.inputText{ background-image: url('../img/inputTextWhite.png'); -moz-background-size: contain; background-size: contain; background-repeat: no-repeat; width: 7%;}
 #leftInput{ position: absolute; left: 3%; top: 20%; }
 #rightInput{ position: absolute; left: 93%; top: 20%; }
 #justSources{ clear: none; margin: 0 0 0 18%;}
-.outputText{  background-image: url('../img/outputText2-1.png'); -moz-background-size: contain; background-size: contain; background-repeat: no-repeat; background-position: left center; width: 2%; }
+.outputText{  background-image: url('../img/outputTextWhite.png'); -moz-background-size: contain; background-size: contain; background-repeat: no-repeat; background-position: left center; width: 2%; }
 #leftOutput{ position: relative; height: auto; float: left; }
 #rightOutput{ position: relative; height: auto; float: right; }
 
@@ -240,12 +241,23 @@ nav a:hover{
 	background-image:url('../img/soundDown2.png'); 
 }
 
-.bottomButtons:active {
+.bottomButtonsLeft:active {
+	border-style: inset;
+	border-width: 6px;
+}
+.bottomButtonsRight:active {
 	border-style: inset;
 	border-width: 6px;
 }
 
-	
+/* OVERRIDE JQUERY TO CENTER THE BUTTONS */
+.ui-dialog .ui-dialog-buttonpane { 
+    text-align: center;
+}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset { 
+    float: none;
+}
+/* END JQUERY CSS OVERRIDE */
 
 /* =============================================================================
    Media Queries
@@ -344,7 +356,7 @@ nav a:hover{
    .inputText{ width: 2%;}
    #leftInput{ z-index: 5; left: 1.5%; top: 5%; }
    #rightInput{ z-index: 5; left: 97%; top: 5%; }
-   #justSources{ clear: none; margin: 0 0 0 9%;}
+   #justSources{ clear: none; margin: 0 0 0 17.3%;}
    .lz { border-width:5px; }
    #centerLZLabel { left: 31%; top: 8%; }
    #leftLZLabel { width: 50%; }
