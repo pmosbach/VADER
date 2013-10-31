@@ -8,25 +8,11 @@ import SocketServer
 import SimpleHTTPServer
 import threading
 from collections import deque
-import xbmc
-import xbmcaddon
-import xbmcgui
 
 if sys.version_info < (2, 7):
     import simplejson
 else:
     import json as simplejson
-
-__addon__        = xbmcaddon.Addon(id='service.mission.control')
-__addonid__      = __addon__.getAddonInfo('id')
-__addonversion__ = __addon__.getAddonInfo('version')
-__addonname__    = __addon__.getAddonInfo('name')
-__author__       = __addon__.getAddonInfo('author')
-__icon__         = __addon__.getAddonInfo('icon')
-__cwd__          = __addon__.getAddonInfo('path').decode("utf-8")
-__resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' ).encode("utf-8") ).decode("utf-8")
-
-sys.path.append(__resource__)
 
 import serial
 
@@ -98,7 +84,7 @@ class switchThread(threading.Thread):
         self.theInputs = theInputs
         self.theOutputs = theOutputs
     def run(self):
-        while (not xbmc.abortRequested):
+        while (True):
             time.sleep(0.1)
             while theSwitchQueue:
                 #print '**  beginning of command queue loop'
@@ -108,7 +94,7 @@ class switchThread(threading.Thread):
                     #print'*   device type: SWITCH'
                     if command[1] == 'reset':
                         #print'    command type: RESET'
-                        xbmc.executebuiltin('Notification(Video Source Control, Resetting All Displays to Default')
+                        #xbmc.executebuiltin('Notification(Video Source Control, Resetting All Displays to Default')
                         ser = serial.Serial(SWITCH_COM, 9600, timeout=0.3)
                         ser.write('\x01\x85\x81\x81')
                         time.sleep(0.02)
@@ -119,7 +105,7 @@ class switchThread(threading.Thread):
                         ser.close()
                     else:
                         #print'    command type: SET ' + theOutputs[command[2]]["name"] + ' TO ' + theInputs[command[1]]["name"]
-                        xbmc.executebuiltin('Notification(Video Source Control, Switching ' + theOutputs[command[2]]["name"] + ' to ' + theInputs[command[1]]["name"] + ')')
+                        #xbmc.executebuiltin('Notification(Video Source Control, Switching ' + theOutputs[command[2]]["name"] + ' to ' + theInputs[command[1]]["name"] + ')')
                         ser = serial.Serial(SWITCH_COM, 9600, timeout=0.3)
                         ser.write('\x01' + theInputs[command[1]]["hexChar"] + theOutputs[command[2]]["hexChar"] + '\x81')
                         ser.close()
@@ -328,7 +314,7 @@ class displayThread(threading.Thread):
         self.theQueue = theQueue
         self.comPort = comPort
     def run(self):
-        while (not xbmc.abortRequested):
+        while (True):
             time.sleep(0.1)
             while self.theQueue:
                 #print '**  beginning of command queue loop'
@@ -368,7 +354,7 @@ class tunerThread(threading.Thread):
         self.theQueue = theQueue
         self.theStatus = theStatus
     def run(self):
-        while (not xbmc.abortRequested):
+        while (True):
             time.sleep(0.1)
             while self.theQueue:
                 #print '**  beginning of command queue loop'
@@ -393,6 +379,7 @@ class tunerThread(threading.Thread):
                             #print '    command: TUNE TO ' + command[2]
                             ser = serial.Serial(TUNER_COM, 9600, timeout=0.2)
                             ser.write('>P1\x0d')
+                            print '>TC=' + command[2] + '\x0d'
                             ser.write('>TC=' + command[2] + '\x0d')
                             ser.close()
                     elif command[1] == 'power':
@@ -422,10 +409,10 @@ class tunerThread(threading.Thread):
                 ser.write('>ST\x0d')
                 ser.read(4)
                 majorChannel = ser.read(3)
-                #print'    :' + majorChannel
+                #print'    ' + majorChannel
                 ser.read(4)
                 minorChannel = ser.read(3)
-                #print'    :' + minorChannel
+                #print'    ' + minorChannel
                 ser.close()
                 theStatus['tuner']['majorChannel'] = majorChannel
                 theStatus['tuner']['minorChannel'] = minorChannel
@@ -437,7 +424,7 @@ class tunerThread(threading.Thread):
         
         
 if (__name__  == "__main__"):
-    xbmc.log('Version %s started' % __addonversion__)
+    #xbmc.log('Version %s started' % __addonversion__)
     theExecQueue = deque()
     theSwitchQueue = deque()
     theLeftDisplayQueue = deque()
@@ -477,27 +464,27 @@ if (__name__  == "__main__"):
     rightDisplayThread.start()     
     tunerThread.start()
     
-    while (not xbmc.abortRequested):
+    while (True):
         time.sleep(0.1)
         theCounter += 1
         while theExecQueue:
             #print '**  beginning of command queue loop'
             command = theExecQueue.popleft()
             #print command
-            if command[0] == 'exec':
-                print'*   command type: SCRIPT EXECUTION'
-                if len(command) == 1:
-                    #print'    command: EXEC ERROR - NO SCRIPT SPECIFIED'
-                    xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('Executor Error','No script specified for execution',5000,__icon__))
-                elif len(command) == 2:
-                    #print'    command: running ' + urllib.unquote_plus(command[1])
-                    xbmc.executebuiltin('RunScript(' + urllib.unquote_plus(command[1]) + ')')
-                elif len(command) == 3:
-                    #print'    command: running ' + urllib.unquote_plus(command[1])
-                    xbmc.executebuiltin('RunScript(' + urllib.unquote_plus(command[1]) + ',' + urllib.unquote_plus(command[2]) + ')')
-                else:
-                    #print'    command: running ' + urllib.unquote_plus(command[1])
-                    xbmc.executebuiltin('RunScript(' + urllib.unquote_plus(command[1]) + ',' + urllib.unquote_plus(command[2]) + ',' + urllib.unquote_plus(command[3]) + ')')
+            #if command[0] == 'exec':
+            #    print'*   command type: SCRIPT EXECUTION'
+            #    if len(command) == 1:
+            #        #print'    command: EXEC ERROR - NO SCRIPT SPECIFIED'
+            #        xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('Executor Error','No script specified for execution',5000,__icon__))
+            #    elif len(command) == 2:
+            #        #print'    command: running ' + urllib.unquote_plus(command[1])
+            #        xbmc.executebuiltin('RunScript(' + urllib.unquote_plus(command[1]) + ')')
+            #    elif len(command) == 3:
+            #        #print'    command: running ' + urllib.unquote_plus(command[1])
+            #        xbmc.executebuiltin('RunScript(' + urllib.unquote_plus(command[1]) + ',' + urllib.unquote_plus(command[2]) + ')')
+            #    else:
+            #        #print'    command: running ' + urllib.unquote_plus(command[1])
+            #        xbmc.executebuiltin('RunScript(' + urllib.unquote_plus(command[1]) + ',' + urllib.unquote_plus(command[2]) + ',' + urllib.unquote_plus(command[3]) + ')')
 
 
         
