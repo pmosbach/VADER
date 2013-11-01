@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<addon
+  id="webinterface.VADER.MDDE"
+  version="0.1"
+  name="VADER.MDDE"
+  provider-name="mdecrist">
+  <requires>
+    <import addon="xbmc.gui" version="4.0.0"/>
+    <import addon="xbmc.json" version="6.0.0"/>
+  </requires>
+  <extension
+    point="xbmc.gui.webinterface"/>
+  <extension point="xbmc.addon.metadata">
+  <summary lang="en">VADER Mission Control Web Interface</summary>
+   <description lang="en">Custom web control interface for VADER. You can use this interface to control all aspects of your VADER set-up including power, volume, and input selection.</description>
+   <language>en</language>
+  <platform>all</platform>
+  </extension>
+</addon>
+
